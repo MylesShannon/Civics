@@ -6,10 +6,11 @@ type NavItem = {
   label: string;
   Icon: LucideIcon;
   end?: boolean;
+  mobileOnly?: boolean;
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Home', Icon: Home, end: true },
+  { to: '/', label: 'Home', Icon: Home, end: true, mobileOnly: true },
   { to: '/study', label: 'Study', Icon: BookOpen },
   { to: '/quiz', label: 'Quiz', Icon: ClipboardCheck },
   { to: '/missed', label: 'Missed', Icon: Repeat },

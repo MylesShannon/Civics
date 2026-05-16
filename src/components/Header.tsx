@@ -22,7 +22,7 @@ export function Header() {
         </NavLink>
         <div className="flex items-center gap-1.5">
           <nav aria-label="Primary" className="hidden md:flex items-center gap-1.5">
-            {NAV_ITEMS.map(({ to, label, Icon, end }) => (
+            {NAV_ITEMS.filter((item) => !item.mobileOnly).map(({ to, label, Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
