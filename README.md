@@ -11,6 +11,7 @@ There is no backend, no authentication, no database, and no analytics. Everythin
   - **Flashcard Study** — random questions with a flip animation; mark cards as known or save for review.
   - **Practice Quiz** — up to 20 randomly chosen questions, oral-style self-grading, ends as soon as you can pass or fail.
   - **Missed Questions** — re-study the questions you graded incorrect, persisted across sessions.
+  - **All Questions** — browse every official question with search, category filter, and per-question reveal (or expand/collapse all).
   - **Stats** — KPIs (pass rate, accuracy, best score, average time) plus your last 10 quiz attempts, all from `localStorage`.
 - **Current officeholder data** is kept separately in [`src/data/currentCivicsAnswers.ts`](src/data/currentCivicsAnswers.ts) and can be re-verified without touching the question bank.
 
@@ -34,11 +35,45 @@ yarn preview
 
 `yarn build` runs the TypeScript project references (`tsc -b`) then a Vite production build into `dist/`. `yarn preview` serves the built output locally for verification.
 
+## Deploy (S3 + CloudFront)
+
+Static-only, so deployment is just "sync to a bucket and invalidate the CDN."
+
+Prerequisites: the AWS CLI installed and configured (`aws configure`) with permissions for `s3:*` on your bucket and `cloudfront:CreateInvalidation` on your distribution.
+
+Set the two required variables. The easiest way is to copy `.env.example` to `.env` and fill it in — the deploy script auto-sources `.env` if present:
+
+```bash
+cp .env.example .env
+# edit .env with your real bucket name and distribution id
+```
+
+Or export them in your shell:
+
+```bash
+export S3_BUCKET=your-bucket-name
+export CLOUDFRONT_DISTRIBUTION_ID=EXXXXXXXXXXXXX
+```
+
+Then:
+
+```bash
+yarn deploy
+```
+
+`yarn deploy` runs [`scripts/deploy.sh`](scripts/deploy.sh) which:
+
+1. Builds the app (`yarn build`).
+2. Syncs hashed JS/CSS/font assets with a long, immutable cache (`max-age=31536000, immutable`). Vite renames these files on every build so they're safe to cache forever.
+3. Uploads `index.html` with `no-cache` so users always pick up the latest asset hashes.
+4. Uploads the official PDF with a short 1-hour cache.
+5. Creates a CloudFront invalidation for only `/index.html` and the PDF — the hashed assets never need invalidation.
+
 ## Tech stack
 
 - **[Vite](https://vitejs.dev/)** — fast dev server and bundler.
 - **React 18 + TypeScript** — modern functional components and hooks, strict TS.
-- **[react-router-dom](https://reactrouter.com/)** — client-side routes for `/`, `/study`, `/quiz`, `/missed`, `/stats`.
+- **[react-router-dom](https://reactrouter.com/)** — client-side routes for `/`, `/study`, `/quiz`, `/missed`, `/all`, `/stats`.
 - **[Tailwind CSS v4](https://tailwindcss.com/)** with a custom CSS-first theme defined in [`src/styles.css`](src/styles.css) via the `@theme` directive.
 - **[framer-motion](https://www.framer.com/motion/)** — flashcard flip, page transitions, animated progress bar. Respects `prefers-reduced-motion`.
 - **[lucide-react](https://lucide.dev/)** — icons.
@@ -65,6 +100,8 @@ src/
     currentCivicsAnswers.ts   # Current officeholder data (NH / Manchester)
   components/
     Header.tsx
+    BottomNav.tsx
+    navItems.ts                # Shared nav definitions for Header + BottomNav
     Flashcard.tsx
     QuizQuestion.tsx
     ProgressBar.tsx
@@ -77,6 +114,7 @@ src/
     StudyMode.tsx
     QuizMode.tsx
     MissedQuestionsMode.tsx
+    AllQuestions.tsx
     Stats.tsx
   utils/
     shuffle.ts

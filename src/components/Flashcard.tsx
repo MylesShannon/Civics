@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import type { CivicsQuestion } from '../data/civics2025';
 import { getDynamicAnswer } from '../data/currentCivicsAnswers';
 import { QuestionBadge } from './QuestionBadge';
+import { ScrollFade } from './ScrollFade';
 
 type Props = {
   question: CivicsQuestion;
@@ -11,7 +12,7 @@ type Props = {
 };
 
 const cardSurface =
-  'absolute inset-0 p-6 flex flex-col gap-3.5 rounded-2xl bg-surface';
+  'absolute inset-0 p-6 flex flex-col gap-3.5 rounded-2xl bg-surface overflow-hidden';
 
 export function Flashcard({ question, flipped, onFlip }: Props) {
   const reduceMotion = useReducedMotion();
@@ -67,13 +68,13 @@ export function Flashcard({ question, flipped, onFlip }: Props) {
           aria-label={internalFlipped ? 'Show question' : 'Show answer'}
           onClick={handleActivate}
           onKeyDown={handleKey}
-          className="relative w-full min-h-[320px] bg-surface border border-line rounded-2xl shadow-lg cursor-pointer flex"
+          className="relative w-full min-h-[320px] max-h-[70vh] bg-surface border border-line rounded-2xl shadow-lg cursor-pointer flex overflow-hidden"
         >
           <AnimatePresence mode="wait" initial={false}>
             {internalFlipped ? (
               <motion.div
                 key="back"
-                className="relative inset-auto w-full p-6 flex flex-col gap-3.5 rounded-2xl bg-surface"
+                className="relative inset-auto w-full p-6 flex flex-col gap-3.5 rounded-2xl bg-surface overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -84,7 +85,7 @@ export function Flashcard({ question, flipped, onFlip }: Props) {
             ) : (
               <motion.div
                 key="front"
-                className="relative inset-auto w-full p-6 flex flex-col gap-3.5 rounded-2xl bg-surface"
+                className="relative inset-auto w-full p-6 flex flex-col gap-3.5 rounded-2xl bg-surface overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -110,7 +111,7 @@ export function Flashcard({ question, flipped, onFlip }: Props) {
         onKeyDown={handleKey}
         animate={{ rotateY: internalFlipped ? 180 : 0 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full min-h-[320px] bg-surface border border-line rounded-2xl shadow-lg cursor-pointer transform-3d"
+        className="relative w-full min-h-[320px] max-h-[70vh] bg-surface border border-line rounded-2xl shadow-lg cursor-pointer transform-3d"
       >
         <div className={`${cardSurface} backface-hidden`}>
           <FlashcardFrontContent question={question} />
@@ -155,32 +156,34 @@ function FlashcardBackContent({
         left={`Answer${question.answers.length > 1 ? 's' : ''}`}
         category={question.category}
       />
-      {dynamicAnswers && dynamicAnswers.length > 0 ? (
-        <>
-          <ul className="mt-1 pl-5 flex flex-col gap-1.5 text-base text-ink list-disc">
-            {dynamicAnswers.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
-          <p className="mt-3 px-3 py-2.5 border-l-[3px] border-line bg-surface-hover text-[0.85rem] text-ink-muted">
-            <strong>Official PDF answer: </strong>
-            {question.answers[0]}
-          </p>
-        </>
-      ) : (
-        <ul className="mt-1 pl-5 flex flex-col gap-1.5 text-base text-ink list-disc">
-          {question.answers.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </ul>
-      )}
+      <ScrollFade className="h-full overflow-y-auto -mr-3 pr-3">
+        {dynamicAnswers && dynamicAnswers.length > 0 ? (
+            <>
+              <ul className="mt-1 pl-5 flex flex-col gap-1.5 text-base text-ink list-disc">
+                {dynamicAnswers.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+              <p className="mt-3 px-3 py-2.5 border-l-[3px] border-line bg-surface-hover text-[0.85rem] text-ink-muted">
+                <strong>Official PDF answer: </strong>
+                {question.answers[0]}
+              </p>
+            </>
+          ) : (
+            <ul className="mt-1 pl-5 flex flex-col gap-1.5 text-base text-ink list-disc">
+              {question.answers.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
+            </ul>
+          )}
+          {question.note ? (
+            <p className="mt-2 text-[0.85rem] text-ink-muted italic">Note: {question.note}</p>
+          ) : null}
+      </ScrollFade>
       <div className="flex flex-wrap gap-1.5">
         {question.isDynamic ? <QuestionBadge kind="current" /> : null}
         {question.id === 29 ? <QuestionBadge kind="address" /> : null}
       </div>
-      {question.note ? (
-        <p className="mt-2 text-[0.85rem] text-ink-muted italic">Note: {question.note}</p>
-      ) : null}
     </>
   );
 }

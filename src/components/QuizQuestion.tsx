@@ -4,6 +4,7 @@ import { Eye, Check, X } from 'lucide-react';
 import type { CivicsQuestion } from '../data/civics2025';
 import { getDynamicAnswer } from '../data/currentCivicsAnswers';
 import { QuestionBadge } from './QuestionBadge';
+import { ScrollFade } from './ScrollFade';
 import { btnPrimary, btnCorrect, btnIncorrect } from '../utils/styles';
 
 type Props = {
@@ -88,7 +89,11 @@ export function QuizQuestion({ question, questionNumber, totalQuestions, onGrade
         </>
       ) : (
         <>
-          <div className="bg-page rounded-xl p-4 border border-line">
+          <ScrollFade
+            wrapperClassName="relative bg-page rounded-xl border border-line"
+            className="max-h-[50vh] overflow-y-auto p-4"
+            fadeClassName="from-page rounded-b-xl"
+          >
             <h3 className="m-0 mb-2 text-navy dark:text-ink text-[0.95rem] uppercase tracking-wider">
               Accepted answers
             </h3>
@@ -114,7 +119,7 @@ export function QuizQuestion({ question, questionNumber, totalQuestions, onGrade
             {question.note ? (
               <p className="mt-2 text-[0.85rem] text-ink-muted italic">Note: {question.note}</p>
             ) : null}
-          </div>
+          </ScrollFade>
 
           <p className="mt-1 mb-0 font-semibold text-center">Did you answer correctly?</p>
           <div className="flex gap-2.5">

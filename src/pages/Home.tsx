@@ -82,7 +82,7 @@ export function Home() {
           className="inline-flex items-center gap-1.5 text-navy dark:text-ink hover:text-red dark:hover:text-fail-text font-semibold no-underline hover:underline"
         >
           <FileText size={14} aria-hidden="true" />
-          View the official USCIS 2025 civics test PDF
+          View the official USCIS 2025 civics test
         </a>
       </footer>
     </div>
